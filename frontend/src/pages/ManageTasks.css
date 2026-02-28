@@ -108,6 +108,11 @@
     color: #10b981;
 }
 
+.freq-pill.onetime {
+    background: #fff7ed;
+    color: #f59e0b;
+}
+
 .date-cell {
     color: #7a8099;
     font-size: 0.85rem;

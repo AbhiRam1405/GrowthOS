@@ -42,6 +42,7 @@ public class TaskService {
             .title(dto.getTitle())
             .category(dto.getCategory())
             .frequency(dto.getFrequency())
+            .scheduledDate(dto.getScheduledDate())
             .build();
         Task saved = taskRepository.save(task);
         log.info("Created task: {}", saved.getId());
@@ -51,7 +52,6 @@ public class TaskService {
     public Task updateTask(String id, TaskDTO dto) {
         Task existing = getTaskById(id);
 
-        // Allow same title (no-op for title) but reject if another task has the same title
         if (taskRepository.existsByTitleAndIdNot(dto.getTitle(), id)) {
             throw new DuplicateTitleException(dto.getTitle());
         }
@@ -59,16 +59,16 @@ public class TaskService {
         existing.setTitle(dto.getTitle());
         existing.setCategory(dto.getCategory());
         existing.setFrequency(dto.getFrequency());
+        existing.setScheduledDate(dto.getScheduledDate());
         Task updated = taskRepository.save(existing);
         log.info("Updated task: {}", updated.getId());
         return updated;
     }
 
     public void deleteTask(String id) {
-        Task task = getTaskById(id);
-        // Cascade delete all status records for this task
+        getTaskById(id);
         taskStatusRepository.deleteByTaskId(id);
-        taskRepository.delete(task);
+        taskRepository.deleteById(id);
         log.info("Deleted task {} and its status history.", id);
     }
 }

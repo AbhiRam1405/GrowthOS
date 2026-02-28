@@ -101,6 +101,7 @@ const ManageTasks = () => {
                             title: editingTask.title,
                             category: editingTask.category,
                             frequency: editingTask.frequency,
+                            scheduledDate: editingTask.scheduledDate
                         } : undefined}
                         onSubmit={handleSubmit}
                         onCancel={handleCancel}
@@ -147,8 +148,9 @@ const ManageTasks = () => {
                                         </span>
                                     </td>
                                     <td>
-                                        <span className={`freq-pill ${task.frequency === 'Daily' ? 'daily' : 'weekly'}`}>
+                                        <span className={`freq-pill ${task.frequency.toLowerCase().replace('-', '')}`}>
                                             {task.frequency}
+                                            {task.frequency === 'One-time' && task.scheduledDate && ` (${new Date(task.scheduledDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })})`}
                                         </span>
                                     </td>
                                     <td className="date-cell">

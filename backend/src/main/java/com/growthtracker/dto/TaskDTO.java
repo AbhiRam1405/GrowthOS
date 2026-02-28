@@ -17,6 +17,8 @@ public class TaskDTO {
     private String category;
 
     @NotBlank(message = "Frequency is required")
-    @Pattern(regexp = "Daily|Weekly", message = "Frequency must be 'Daily' or 'Weekly'")
+    @Pattern(regexp = "Daily|Weekly|One-time", message = "Frequency must be 'Daily', 'Weekly' or 'One-time'")
     private String frequency;
+
+    private java.time.LocalDate scheduledDate;
 }

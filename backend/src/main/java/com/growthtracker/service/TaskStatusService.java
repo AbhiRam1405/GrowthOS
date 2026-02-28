@@ -58,24 +58,27 @@ public class TaskStatusService {
         return saved;
     }
 
-    /**
-     * Returns all tasks with their completion status for the given date.
-     * Tasks without a status record are treated as not completed.
-     */
     public List<TaskWithStatusDTO> getTasksWithStatus(LocalDate date) {
         List<Task> allTasks = taskRepository.findAll();
+        
+        // Filter tasks: Daily and Weekly appear every day. One-time tasks only on their scheduled date.
+        List<Task> filteredTasks = allTasks.stream()
+            .filter(t -> !"One-time".equalsIgnoreCase(t.getFrequency()) || date.equals(t.getScheduledDate()))
+            .toList();
+
         List<TaskStatus> statuses = taskStatusRepository.findByDate(date);
 
         // Build lookup map: taskId → completed
         Map<String, Boolean> statusMap = statuses.stream()
             .collect(Collectors.toMap(TaskStatus::getTaskId, TaskStatus::isCompleted));
 
-        return allTasks.stream()
+        return filteredTasks.stream()
             .map(task -> TaskWithStatusDTO.builder()
                 .taskId(task.getId())
                 .title(task.getTitle())
                 .category(task.getCategory())
                 .frequency(task.getFrequency())
+                .scheduledDate(task.getScheduledDate())
                 .completed(statusMap.getOrDefault(task.getId(), false))
                 .build())
             .toList();

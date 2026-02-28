@@ -4,12 +4,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -32,8 +35,10 @@ public class Task {
 
     private String category;
 
-    /** "Daily" or "Weekly" — affects streak calculation */
+    /** "Daily", "Weekly", or "One-time" */
     private String frequency;
+
+    private LocalDate scheduledDate;
 
     @CreatedDate
     private LocalDateTime createdAt;

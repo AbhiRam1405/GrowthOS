@@ -45,27 +45,28 @@ public class DailySummaryService {
     public DailySummary recompute(LocalDate date) {
         String dateStr = date.format(DATE_FMT);
 
-        // Retrieve all DAILY tasks for streak calculation
+        // Streak (70%) tasks for this date: Daily + One-time tasks scheduled for today
         List<Task> allTasks = taskRepository.findAll();
-        List<Task> dailyTasks = allTasks.stream()
-            .filter(t -> "Daily".equalsIgnoreCase(t.getFrequency()))
+        List<Task> streakTasks = allTasks.stream()
+            .filter(t -> "Daily".equalsIgnoreCase(t.getFrequency()) || 
+                        ("One-time".equalsIgnoreCase(t.getFrequency()) && date.equals(t.getScheduledDate())))
             .toList();
 
-        int totalDailyTasks = dailyTasks.size();
+        int totalStreakTasks = streakTasks.size();
 
-        // If no Daily tasks exist, streak = 0
-        if (totalDailyTasks == 0) {
+        // If no Daily/Today tasks exist, streak = 0
+        if (totalStreakTasks == 0) {
             return saveSummary(dateStr, 0, 0, 0.0, 0, resolveCurrentLongest(0));
         }
 
-        // Count completed Daily tasks for today
+        // Count completed streak tasks for today
         List<TaskStatus> todayStatuses = taskStatusRepository.findByDate(date);
         long completedCount = todayStatuses.stream()
             .filter(TaskStatus::isCompleted)
-            .filter(s -> isDailyTask(dailyTasks, s.getTaskId()))
+            .filter(s -> isStreakTask(streakTasks, s.getTaskId()))
             .count();
 
-        double completionPct = (double) completedCount / totalDailyTasks * 100.0;
+        double completionPct = (double) completedCount / totalStreakTasks * 100.0;
 
         // Determine streak from yesterday's summary
         String yesterdayStr = date.minusDays(1).format(DATE_FMT);
@@ -76,11 +77,11 @@ public class DailySummaryService {
         int streak = (completionPct >= 70.0) ? (yesterdayStreak + 1) : 0;
         int longestStreak = resolveCurrentLongest(streak);
 
-        return saveSummary(dateStr, totalDailyTasks, (int) completedCount, completionPct, streak, longestStreak);
+        return saveSummary(dateStr, totalStreakTasks, (int) completedCount, completionPct, streak, longestStreak);
     }
 
-    private boolean isDailyTask(List<Task> dailyTasks, String taskId) {
-        return dailyTasks.stream().anyMatch(t -> t.getId().equals(taskId));
+    private boolean isStreakTask(List<Task> streakTasks, String taskId) {
+        return streakTasks.stream().anyMatch(t -> t.getId().equals(taskId));
     }
 
     /**

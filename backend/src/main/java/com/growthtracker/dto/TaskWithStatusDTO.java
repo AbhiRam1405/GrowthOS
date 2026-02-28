@@ -19,5 +19,6 @@ public class TaskWithStatusDTO {
     private String title;
     private String category;
     private String frequency;
+    private java.time.LocalDate scheduledDate;
     private boolean completed;
 }

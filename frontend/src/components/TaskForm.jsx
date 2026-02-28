@@ -53,7 +53,7 @@ const TaskForm = ({ initialData, onSubmit, onCancel, loading }) => {
                 <div className="form-group">
                     <label className="form-label">Frequency</label>
                     <div className="freq-toggle">
-                        {['Daily', 'Weekly'].map(f => (
+                        {['Daily', 'Weekly', 'One-time'].map(f => (
                             <button
                                 key={f}
                                 type="button"
@@ -65,6 +65,21 @@ const TaskForm = ({ initialData, onSubmit, onCancel, loading }) => {
                     </div>
                 </div>
             </div>
+
+            {form.frequency === 'One-time' && (
+                <div className="form-group">
+                    <label className="form-label">Scheduled Date</label>
+                    <input
+                        type="date"
+                        name="scheduledDate"
+                        value={form.scheduledDate || ''}
+                        onChange={handleChange}
+                        className="form-input"
+                        min={new Date().toISOString().split('T')[0]}
+                        required
+                    />
+                </div>
+            )}
 
             <div className="form-actions">
                 <button type="submit" className="btn-primary" disabled={loading}>
