@@ -1,0 +1,167 @@
+.manage-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.manage-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.page-title {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #1a1f36;
+    margin: 0;
+}
+
+.page-sub {
+    font-size: 0.88rem;
+    color: #7a8099;
+    margin-top: 0.3rem;
+}
+
+.form-panel {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 1.8rem;
+    box-shadow: 0 2px 14px rgba(67, 97, 238, 0.1);
+    border: 1.5px solid #e0e7ff;
+}
+
+.form-panel-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1a1f36;
+    margin: 0 0 1.4rem 0;
+}
+
+.task-table-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.task-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.task-table thead tr {
+    background: #f8f9fc;
+    border-bottom: 1.5px solid #e8ecf0;
+}
+
+.task-table th {
+    padding: 1rem 1.2rem;
+    text-align: left;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #7a8099;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.task-row {
+    border-bottom: 1px solid #f0f4ff;
+    transition: background 0.15s;
+}
+
+.task-row:last-child {
+    border-bottom: none;
+}
+
+.task-row:hover {
+    background: #f8f9fc;
+}
+
+.task-table td {
+    padding: 1rem 1.2rem;
+    color: #1a1f36;
+    vertical-align: middle;
+}
+
+.task-name-cell {
+    font-weight: 500;
+}
+
+.cat-pill,
+.freq-pill {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.freq-pill.daily {
+    background: #eff6ff;
+    color: #4361ee;
+}
+
+.freq-pill.weekly {
+    background: #f0fdf4;
+    color: #10b981;
+}
+
+.date-cell {
+    color: #7a8099;
+    font-size: 0.85rem;
+}
+
+.actions-cell {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-edit,
+.btn-delete {
+    padding: 0.35rem 0.9rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.18s;
+    font-family: inherit;
+}
+
+.btn-edit {
+    background: #f0f4ff;
+    color: #4361ee;
+}
+
+.btn-edit:hover {
+    background: #dce4ff;
+}
+
+.btn-delete {
+    background: #fff5f5;
+    color: #e74c3c;
+}
+
+.btn-delete:hover {
+    background: #fee2e2;
+}
+
+.btn-primary {
+    padding: 0.65rem 1.4rem;
+    background: #4361ee;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    font-family: inherit;
+}
+
+.btn-primary:hover {
+    background: #3451d1;
+    transform: translateY(-1px);
+}

@@ -1,0 +1,26 @@
+.quote-card {
+    background: linear-gradient(135deg, #4361ee 0%, #7b2ff7 100%);
+    border-radius: 14px;
+    padding: 1.6rem 2rem;
+    color: #ffffff;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    box-shadow: 0 4px 16px rgba(67, 97, 238, 0.3);
+}
+
+.quote-mark {
+    font-size: 3.5rem;
+    line-height: 1;
+    opacity: 0.4;
+    font-family: Georgia, serif;
+    margin-top: -0.5rem;
+    flex-shrink: 0;
+}
+
+.quote-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    font-style: italic;
+    font-weight: 400;
+}
