@@ -19,6 +19,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.ConditionalOperators;
+import org.springframework.data.mongodb.core.aggregation.ComparisonOperators;
 import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -183,14 +184,14 @@ public class TaskService {
         if ("priority".equalsIgnoreCase(sortBy)) {
             AggregationOperation match = Aggregation.match(criteria);
             
-            // Safer weight assignment using valueOf(field).equalToValue(enum_string)
+            // Safer weight assignment using nested ConditionalOperators.when
+            // Note: withValue() returns the AggregationOperation directly, no .build() needed at the end.
             AggregationOperation addWeight = Aggregation.addFields()
                 .addField("prioWeight")
-                .withValue(ConditionalOperators.when(org.springframework.data.mongodb.core.aggregation.ComparisonOperators.Eq.valueOf("priority").equalToValue("URGENT")).then(3)
-                    .otherwise(ConditionalOperators.when(org.springframework.data.mongodb.core.aggregation.ComparisonOperators.Eq.valueOf("priority").equalToValue("HIGH")).then(2)
-                        .otherwise(ConditionalOperators.when(org.springframework.data.mongodb.core.aggregation.ComparisonOperators.Eq.valueOf("priority").equalToValue("MEDIUM")).then(1)
-                            .otherwise(0))))
-                .build();
+                .withValue(ConditionalOperators.when(ComparisonOperators.valueOf("priority").equalToValue("URGENT")).then(3)
+                    .otherwise(ConditionalOperators.when(ComparisonOperators.valueOf("priority").equalToValue("HIGH")).then(2)
+                        .otherwise(ConditionalOperators.when(ComparisonOperators.valueOf("priority").equalToValue("MEDIUM")).then(1)
+                            .otherwise(0))));
             
             AggregationOperation sort = Aggregation.sort(Sort.Direction.DESC, "prioWeight")
                     .and(Sort.Direction.DESC, "completedAt"); // secondary sort
