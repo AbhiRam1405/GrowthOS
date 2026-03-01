@@ -125,6 +125,10 @@ public class TaskService {
     }
 
     public List<Task> getTaskHistory(TaskHistoryFilterRequest filters) {
+        if (filters == null) {
+            filters = new TaskHistoryFilterRequest();
+        }
+
         // 1. Date Validation
         if (filters.getStartDate() != null && filters.getEndDate() != null 
                 && filters.getStartDate().isAfter(filters.getEndDate())) {
@@ -170,45 +174,26 @@ public class TaskService {
 
         // 4. Sorting
         String sortBy = filters.getSortBy();
-        if ("oldest".equalsIgnoreCase(sortBy)) {
-            query.with(Sort.by(Sort.Direction.ASC, "completedAt"));
-        } else if ("time_desc".equalsIgnoreCase(sortBy)) {
-            query.with(Sort.by(Sort.Direction.DESC, "timeSpent"));
-        } else if ("priority".equalsIgnoreCase(sortBy)) {
-            // High to Low: URGENT > HIGH > MEDIUM > LOW
-            // Note: MongoDB enum sorting is usually alphabetical by default unless custom logic is applied.
-            // For true priority sorting, we might need a custom weight or use a switch/case in aggregation.
-            // However, common practice is to use Sort.by(Sort.Direction.DESC, "priority") if the enum order matches.
-            // Let's use string-based or we'll have to manually handle it if needed.
-            // The user asked for URGENT > HIGH > MEDIUM > LOW. Alphabetically: U, H, M, L.
-            // That's U(RGENT), M(EDIUM), L(OW), H(IGH) - doesn't work.
-            // I will use a simple switch/case or just sort by the field and warn user if enum order is not alphabetical.
-            // Alternatively, I'll use a manual Sort if possible or just DESC on priority.
-            query.with(Sort.by(Sort.Direction.DESC, "priority")); 
-        } else {
-            // Default: latest completed first
-            query.with(Sort.by(Sort.Direction.DESC, "completedAt"));
-        }
-
+        
         // 5. Pagination
         int page = (filters.getPage() != null && filters.getPage() >= 0) ? filters.getPage() : 0;
         int size = (filters.getSize() != null && filters.getSize() > 0) ? filters.getSize() : 10;
         
-        // If sorting by priority, we need custom weights
+        // If sorting by priority, we need custom weights via Aggregation
         if ("priority".equalsIgnoreCase(sortBy)) {
-            // Using Aggregation for custom sort weights
             AggregationOperation match = Aggregation.match(criteria);
             
-            // Add weight field: URGENT(3), HIGH(2), MEDIUM(1), LOW(0)
+            // Safer weight assignment using valueOf(field).equalToValue(enum_string)
             AggregationOperation addWeight = Aggregation.addFields()
                 .addField("prioWeight")
-                .withValue(ConditionalOperators.when(Criteria.where("priority").is("URGENT")).then(Priority.URGENT.getWeight())
-                    .otherwise(ConditionalOperators.when(Criteria.where("priority").is("HIGH")).then(Priority.HIGH.getWeight())
-                        .otherwise(ConditionalOperators.when(Criteria.where("priority").is("MEDIUM")).then(Priority.MEDIUM.getWeight())
-                            .otherwise(Priority.LOW.getWeight()))))
+                .withValue(ConditionalOperators.when(org.springframework.data.mongodb.core.aggregation.ComparisonOperators.Eq.valueOf("priority").equalToValue("URGENT")).then(3)
+                    .otherwise(ConditionalOperators.when(org.springframework.data.mongodb.core.aggregation.ComparisonOperators.Eq.valueOf("priority").equalToValue("HIGH")).then(2)
+                        .otherwise(ConditionalOperators.when(org.springframework.data.mongodb.core.aggregation.ComparisonOperators.Eq.valueOf("priority").equalToValue("MEDIUM")).then(1)
+                            .otherwise(0))))
                 .build();
             
-            AggregationOperation sort = Aggregation.sort(Sort.Direction.DESC, "prioWeight");
+            AggregationOperation sort = Aggregation.sort(Sort.Direction.DESC, "prioWeight")
+                    .and(Sort.Direction.DESC, "completedAt"); // secondary sort
             AggregationOperation skip = Aggregation.skip((long) page * size);
             AggregationOperation limit = Aggregation.limit(size);
             
@@ -217,6 +202,15 @@ public class TaskService {
         }
 
         // Standard Query for other cases
+        if ("oldest".equalsIgnoreCase(sortBy)) {
+            query.with(Sort.by(Sort.Direction.ASC, "completedAt"));
+        } else if ("time_desc".equalsIgnoreCase(sortBy)) {
+            query.with(Sort.by(Sort.Direction.DESC, "timeSpent"));
+        } else {
+            // Default: latest completed first
+            query.with(Sort.by(Sort.Direction.DESC, "completedAt"));
+        }
+
         query.with(PageRequest.of(page, size));
         return mongoTemplate.find(query, Task.class);
     }
