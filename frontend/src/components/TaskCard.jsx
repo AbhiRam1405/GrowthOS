@@ -1,4 +1,5 @@
 import React from 'react';
+import PriorityBadge from './PriorityBadge';
 import './TaskCard.css';
 
 const categoryColors = {
@@ -13,6 +14,7 @@ const categoryColors = {
 
 const TaskCard = ({ task, onToggle }) => {
     const color = categoryColors[task.category] || categoryColors.Other;
+    const isGloballyCompleted = task.status === 'COMPLETED';
 
     return (
         <div className={`task-card ${task.completed ? 'completed' : ''}`}
@@ -23,6 +25,7 @@ const TaskCard = ({ task, onToggle }) => {
                     checked={task.completed}
                     onChange={() => onToggle(task.taskId, !task.completed)}
                     className="task-checkbox"
+                    disabled={isGloballyCompleted}
                 />
                 <span className="custom-checkbox" />
             </label>
@@ -34,6 +37,7 @@ const TaskCard = ({ task, onToggle }) => {
                         {task.category}
                     </span>
                     <span className="task-badge freq-badge">{task.frequency}</span>
+                    <PriorityBadge priority={task.priority} />
                 </div>
             </div>
         </div>

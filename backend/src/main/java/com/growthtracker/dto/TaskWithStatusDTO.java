@@ -1,5 +1,6 @@
 package com.growthtracker.dto;
 
+import com.growthtracker.model.Priority;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,5 +21,7 @@ public class TaskWithStatusDTO {
     private String category;
     private String frequency;
     private java.time.LocalDate scheduledDate;
+    private String status;
+    private Priority priority;
     private boolean completed;
 }

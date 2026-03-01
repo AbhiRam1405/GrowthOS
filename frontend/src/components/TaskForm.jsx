@@ -8,6 +8,7 @@ const TaskForm = ({ initialData, onSubmit, onCancel, loading }) => {
         title: '',
         category: 'Coding',
         frequency: 'Daily',
+        priority: 'MEDIUM',
         ...initialData,
     });
     const [error, setError] = useState('');
@@ -63,6 +64,18 @@ const TaskForm = ({ initialData, onSubmit, onCancel, loading }) => {
                             </button>
                         ))}
                     </div>
+                </div>
+            </div>
+
+            <div className="form-row">
+                <div className="form-group">
+                    <label className="form-label">Priority</label>
+                    <select name="priority" value={form.priority} onChange={handleChange} className="form-select">
+                        <option value="LOW">Low</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="HIGH">High</option>
+                        <option value="URGENT">Urgent 🔥</option>
+                    </select>
                 </div>
             </div>
 

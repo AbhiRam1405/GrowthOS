@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getAllTasks, createTask, updateTask, deleteTask } from '../services/taskService';
+import { getAllTasks, createTask, updateTask, deleteTask, completeTask } from '../services/taskService';
 import TaskForm from '../components/TaskForm';
+import TaskCompletionModal from '../components/TaskCompletionModal';
+import TaskDetailsModal from '../components/TaskDetailsModal';
+import PriorityBadge from '../components/PriorityBadge';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 import EmptyState from '../components/EmptyState';
@@ -18,6 +21,8 @@ const ManageTasks = () => {
     const [error, setError] = useState('');
     const [formError, setFormError] = useState('');
     const [editingTask, setEditingTask] = useState(null);
+    const [completingTask, setCompletingTask] = useState(null);
+    const [viewingTask, setViewingTask] = useState(null);
     const [showForm, setShowForm] = useState(false);
 
     const loadTasks = useCallback(async () => {
@@ -77,6 +82,19 @@ const ManageTasks = () => {
         setFormError('');
     };
 
+    const handleComplete = async (completionData) => {
+        setFormLoading(true);
+        try {
+            await completeTask(completingTask.id, completionData);
+            setCompletingTask(null);
+            await loadTasks();
+        } catch (err) {
+            alert('Failed to complete task: ' + err.message);
+        } finally {
+            setFormLoading(false);
+        }
+    };
+
     return (
         <div className="manage-page">
             <div className="manage-header">
@@ -101,7 +119,8 @@ const ManageTasks = () => {
                             title: editingTask.title,
                             category: editingTask.category,
                             frequency: editingTask.frequency,
-                            scheduledDate: editingTask.scheduledDate
+                            scheduledDate: editingTask.scheduledDate,
+                            priority: editingTask.priority
                         } : undefined}
                         onSubmit={handleSubmit}
                         onCancel={handleCancel}
@@ -130,7 +149,8 @@ const ManageTasks = () => {
                                 <th>Task</th>
                                 <th>Category</th>
                                 <th>Frequency</th>
-                                <th>Created</th>
+                                <th>Priority</th>
+                                <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -150,13 +170,21 @@ const ManageTasks = () => {
                                     <td>
                                         <span className={`freq-pill ${task.frequency.toLowerCase().replace('-', '')}`}>
                                             {task.frequency}
-                                            {task.frequency === 'One-time' && task.scheduledDate && ` (${new Date(task.scheduledDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })})`}
                                         </span>
                                     </td>
-                                    <td className="date-cell">
-                                        {task.createdAt ? new Date(task.createdAt).toLocaleDateString('en-IN') : '—'}
+                                    <td>
+                                        <PriorityBadge priority={task.priority} />
+                                    </td>
+                                    <td>
+                                        <span className={`status-badge ${task.status?.toLowerCase() || 'pending'}`}>
+                                            {task.status || 'PENDING'}
+                                        </span>
                                     </td>
                                     <td className="actions-cell">
+                                        <button className="btn-view" onClick={() => setViewingTask(task)}>View</button>
+                                        {task.status !== 'COMPLETED' && (
+                                            <button className="btn-complete" onClick={() => setCompletingTask(task)}>Done</button>
+                                        )}
                                         <button className="btn-edit" onClick={() => handleEdit(task)}>Edit</button>
                                         <button className="btn-delete" onClick={() => handleDelete(task.id)}>Delete</button>
                                     </td>
@@ -165,6 +193,22 @@ const ManageTasks = () => {
                         </tbody>
                     </table>
                 </div>
+            )}
+
+            {completingTask && (
+                <TaskCompletionModal
+                    task={completingTask}
+                    onSave={handleComplete}
+                    onCancel={() => setCompletingTask(null)}
+                    loading={formLoading}
+                />
+            )}
+
+            {viewingTask && (
+                <TaskDetailsModal
+                    task={viewingTask}
+                    onClose={() => setViewingTask(null)}
+                />
             )}
         </div>
     );

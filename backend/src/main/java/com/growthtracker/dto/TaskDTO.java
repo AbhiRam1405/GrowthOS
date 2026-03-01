@@ -1,6 +1,8 @@
 package com.growthtracker.dto;
 
+import com.growthtracker.model.Priority;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
@@ -21,4 +23,7 @@ public class TaskDTO {
     private String frequency;
 
     private java.time.LocalDate scheduledDate;
+
+    @NotNull(message = "Priority is required")
+    private Priority priority;
 }

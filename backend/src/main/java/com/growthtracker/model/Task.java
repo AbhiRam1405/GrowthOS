@@ -12,6 +12,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import org.springframework.data.mongodb.core.mapping.Field;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -33,12 +35,30 @@ public class Task {
     @Indexed(unique = true)
     private String title;
 
+    @Indexed
     private String category;
 
     /** "Daily", "Weekly", or "One-time" */
     private String frequency;
 
     private LocalDate scheduledDate;
+
+    @Indexed
+    @Field("status")
+    @Builder.Default
+    private String status = "PENDING";
+
+    private String completionNote;
+
+    private Integer timeSpent;
+
+    @Indexed
+    private LocalDateTime completedAt;
+
+    @Indexed
+    @Field("priority")
+    @Builder.Default
+    private Priority priority = Priority.MEDIUM;
 
     @CreatedDate
     private LocalDateTime createdAt;

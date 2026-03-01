@@ -1,6 +1,8 @@
 package com.growthtracker.controller;
 
+import com.growthtracker.dto.CompleteTaskRequest;
 import com.growthtracker.dto.TaskDTO;
+import com.growthtracker.dto.TaskHistoryFilterRequest;
 import com.growthtracker.model.Task;
 import com.growthtracker.service.TaskService;
 import jakarta.validation.Valid;
@@ -38,5 +40,21 @@ public class TaskController {
     public ResponseEntity<Void> deleteTask(@PathVariable String id) {
         taskService.deleteTask(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/complete")
+    public ResponseEntity<Task> completeTask(@PathVariable String id,
+                                             @Valid @RequestBody CompleteTaskRequest request) {
+        return ResponseEntity.ok(taskService.completeTask(id, request));
+    }
+
+    @GetMapping("/{id}")
+    public Task getTask(@PathVariable String id) {
+        return taskService.getTaskById(id);
+    }
+
+    @PostMapping("/history")
+    public List<Task> getTaskHistory(@RequestBody TaskHistoryFilterRequest filters) {
+        return taskService.getTaskHistory(filters);
     }
 }

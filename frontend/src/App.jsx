@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
 import ManageTasks from './pages/ManageTasks';
 import Analytics from './pages/Analytics';
+import TaskHistory from './pages/TaskHistory';
 import './index.css';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/tasks" element={<ManageTasks />} />
             <Route path="/analytics" element={<Analytics />} />
+            <Route path="/history" element={<TaskHistory />} />
           </Routes>
         </main>
       </div>

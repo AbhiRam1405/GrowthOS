@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getTasksWithStatus, markStatus, getDailySummary } from '../services/statusService';
 import { getWeeklyAnalytics, getRandomQuote, getSuggestion } from '../services/analyticsService';
+import { completeTask } from '../services/taskService';
 import TaskCard from '../components/TaskCard';
+import TaskCompletionModal from '../components/TaskCompletionModal';
 import SummaryCard from '../components/SummaryCard';
 import QuoteCard from '../components/QuoteCard';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -22,6 +24,8 @@ const Dashboard = () => {
     const [quote, setQuote] = useState(null);
     const [suggestion, setSuggestion] = useState('');
     const [loading, setLoading] = useState(true);
+    const [completingTask, setCompletingTask] = useState(null);
+    const [modalLoading, setModalLoading] = useState(false);
     const [error, setError] = useState('');
 
     const loadData = useCallback(async () => {
@@ -50,18 +54,35 @@ const Dashboard = () => {
     useEffect(() => { loadData(); }, [loadData]);
 
     const handleToggle = async (taskId, completed) => {
+        if (completed) {
+            const task = tasks.find(t => t.taskId === taskId);
+            setCompletingTask({ ...task, id: task.taskId }); // Align ID for modal
+            return;
+        }
+
         try {
-            await markStatus(taskId, selectedDate, completed);
-            const [updatedTasks, updatedSummary, updatedAnalytics] = await Promise.all([
-                getTasksWithStatus(selectedDate),
-                getDailySummary(selectedDate),
-                getWeeklyAnalytics(),
-            ]);
-            setTasks(updatedTasks);
-            setSummary(updatedSummary);
-            setAnalytics(updatedAnalytics);
+            await markStatus(taskId, selectedDate, false);
+            await loadData();
         } catch (err) {
             setError(err.message);
+        }
+    };
+
+    const handleCompleteSave = async (completionData) => {
+        setModalLoading(true);
+        try {
+            // 1. Update overall Task status + Note + Time
+            await completeTask(completingTask.id, completionData);
+
+            // 2. Mark as completed for the day in TaskStatus
+            await markStatus(completingTask.id, selectedDate, true);
+
+            setCompletingTask(null);
+            await loadData();
+        } catch (err) {
+            alert('Failed to complete task: ' + err.message);
+        } finally {
+            setModalLoading(false);
         }
     };
 
@@ -150,6 +171,15 @@ const Dashboard = () => {
                     <h2 className="section-title">📈 7-Day Progress</h2>
                     <LineChart data={analytics.dailyProgress} />
                 </div>
+            )}
+
+            {completingTask && (
+                <TaskCompletionModal
+                    task={completingTask}
+                    onSave={handleCompleteSave}
+                    onCancel={() => setCompletingTask(null)}
+                    loading={modalLoading}
+                />
             )}
         </div>
     );

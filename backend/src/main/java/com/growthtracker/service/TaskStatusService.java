@@ -73,14 +73,29 @@ public class TaskStatusService {
             .collect(Collectors.toMap(TaskStatus::getTaskId, TaskStatus::isCompleted));
 
         return filteredTasks.stream()
-            .map(task -> TaskWithStatusDTO.builder()
-                .taskId(task.getId())
-                .title(task.getTitle())
-                .category(task.getCategory())
-                .frequency(task.getFrequency())
-                .scheduledDate(task.getScheduledDate())
-                .completed(statusMap.getOrDefault(task.getId(), false))
-                .build())
+            .map(task -> {
+                boolean isGloballyCompleted = "COMPLETED".equals(task.getStatus());
+                boolean isDailyCompleted = statusMap.getOrDefault(task.getId(), false);
+
+                return TaskWithStatusDTO.builder()
+                    .taskId(task.getId())
+                    .title(task.getTitle())
+                    .category(task.getCategory())
+                    .frequency(task.getFrequency())
+                    .scheduledDate(task.getScheduledDate())
+                    .status(task.getStatus())
+                    .priority(task.getPriority())
+                    .completed(isGloballyCompleted || isDailyCompleted)
+                    .build();
+            })
+            .sorted((t1, t2) -> {
+                // Primary: completion (false first)
+                if (!t1.isCompleted() && t2.isCompleted()) return -1;
+                if (t1.isCompleted() && !t2.isCompleted()) return 1;
+                
+                // Secondary: Priority (Weight DESC)
+                return Integer.compare(t2.getPriority().getWeight(), t1.getPriority().getWeight());
+            })
             .toList();
     }
 }
