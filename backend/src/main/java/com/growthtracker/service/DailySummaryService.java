@@ -60,10 +60,15 @@ public class DailySummaryService {
         }
 
         // Count completed streak tasks for today
+        // A task is completed if it has a TaskStatus record marked true OR if its global status is COMPLETED
         List<TaskStatus> todayStatuses = taskStatusRepository.findByDate(date);
-        long completedCount = todayStatuses.stream()
+        java.util.Set<String> dailyCompletedIds = todayStatuses.stream()
             .filter(TaskStatus::isCompleted)
-            .filter(s -> isStreakTask(streakTasks, s.getTaskId()))
+            .map(TaskStatus::getTaskId)
+            .collect(java.util.stream.Collectors.toSet());
+
+        long completedCount = streakTasks.stream()
+            .filter(t -> dailyCompletedIds.contains(t.getId()) || "COMPLETED".equals(t.getStatus()))
             .count();
 
         double completionPct = (double) completedCount / totalStreakTasks * 100.0;
