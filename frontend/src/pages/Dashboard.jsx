@@ -44,6 +44,12 @@ const Dashboard = () => {
             setAnalytics(analyticsData);
             setQuote(quoteData);
             setSuggestion(suggData.suggestion || '');
+
+            // Trigger summary recompute to ensure freshness (non-blocking)
+            if (tasksData.length > 0) {
+                const firstTask = tasksData[0];
+                markStatus(firstTask.taskId, selectedDate, firstTask.completed).catch(() => { });
+            }
         } catch (err) {
             setError(err.message);
         } finally {
@@ -131,7 +137,10 @@ const Dashboard = () => {
 
             {/* Stats Grid */}
             <div className="stats-grid">
-                <SummaryCard icon="✅" label={`${isToday ? "Today's" : "Day's"} Progress`} value={`${completionPct}%`}
+                <SummaryCard
+                    icon={completionPct === '100.0' ? "✅" : (completionPct === '0.0' ? "⭕" : "📊")}
+                    label={`${isToday ? "Today's" : "Day's"} Progress`}
+                    value={`${completionPct}%`}
                     sub={`${tasks.filter(t => t.completed).length} / ${tasks.length} tasks`}
                     color="#4361ee" />
                 <SummaryCard icon="🔥" label="Current Streak" value={`${streak} day${streak !== 1 ? 's' : ''}`}

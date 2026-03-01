@@ -45,11 +45,11 @@ public class DailySummaryService {
     public DailySummary recompute(LocalDate date) {
         String dateStr = date.format(DATE_FMT);
 
-        // Streak (70%) tasks for this date: Daily + One-time tasks scheduled for today
+        // Streak (70%) tasks for this date: Daily, Weekly + One-time tasks scheduled for today
         List<Task> allTasks = taskRepository.findAll();
         List<Task> streakTasks = allTasks.stream()
-            .filter(t -> "Daily".equalsIgnoreCase(t.getFrequency()) || 
-                        ("One-time".equalsIgnoreCase(t.getFrequency()) && date.equals(t.getScheduledDate())))
+            .filter(t -> !"One-time".equalsIgnoreCase(t.getFrequency()) || 
+                        (t.getScheduledDate() != null && date.equals(t.getScheduledDate())))
             .toList();
 
         int totalStreakTasks = streakTasks.size();
